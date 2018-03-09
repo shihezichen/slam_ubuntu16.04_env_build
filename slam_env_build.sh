@@ -23,13 +23,13 @@ sudo apt install -y \
 
 
 mkdir -p  ~/Downloads && cd ~/Downloads
-if [ ! -f Sophus-master.zip  ]; then
+if [ ! -f sophus-master.zip  ]; then
     echo "Sophus: download..." 
-    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O Sophus-master.zip https://codeload.github.com/strasdat/Sophus/zip/master 
-    unzip Sophus-master.zip 
+    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O sophus-master.zip https://codeload.github.com/strasdat/Sophus/zip/master 
+    unzip sophus-master.zip 
 fi
 echo "Sophus: compile & install..." 
-mkdir -p ~/Downloads/Sophus-master/build && cd ~/Downloads/Sophus-master/build 
+mkdir -p ~/Downloads/sophus-master/build && cd ~/Downloads/sophus-master/build 
 cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_DOCS=NO .. 
 make -j"$(nproc)" && make install 
 
