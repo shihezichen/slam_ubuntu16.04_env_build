@@ -1,21 +1,29 @@
 #!/bin/sh
 
+# description: build the slam development environment .
+#     include the dependency libraries, Eigen3, Sophus, Pangolin, Ceres, G2O, 
+#     PCL and  opencv3.2.1 and opencv 3.4.1
+
+# Author: shihezichen@live.cn
+
+
+# the install log file
 log_file=~/Downloads/install.log
 log_file_bak=${log_file}.bak
 
-# show message at screen 
+# func: show message at screen 
 # para: message to show
 msg(){ 
     echo $@
 }
 
-# show message at screen and logfile
+# func: show message at screen and logfile
 # para: message to show
 msg_all(){
     echo $@ | tee -a $log_file
 }
 
-# execute the cmd without any cmd show at screen, and store the process to log file record
+# func: execute the cmd without any cmd show at screen, and store the process to log file record
 # para: the cmd 
 exec_cmd_quiet() {
      $@ >> $log_file
@@ -26,14 +34,14 @@ exec_cmd_quiet() {
 	 fi
 }
 
-# execute the cmd with cmd show at screen, and store the process to log file record
+# func:  execute the cmd with cmd show at screen, and store the process to log file record
 # para: the cmd 
 exec_cmd_log() {
      msg_all "$@"
 	 exec_cmd_quiet $@
 }
 
-# execute the cmd and show proecess at screen and store them to log file record
+# func:  execute the cmd and show proecess at screen and store them to log file record
 # para: the cmd
 exec_cmd_all() {
      msg_all "$@"
@@ -45,15 +53,18 @@ exec_cmd_all() {
 	 fi
 }
 
-# install depend lib with apt-get 
+# func: install depend lib with apt-get 
 # para: the libs' name
 install_lib() {
    msg_all " "
    msg_all "install $@"
    exec_cmd_quiet "sudo apt-get install -y $@"
+   if [ $? -eq 0 ]; then
+	msg_all "done."
+   fi
 }
 
-# download file to local directory
+# func: download file to local directory '~/Downloads'
 # para1: the local file name, e.g. Sophus-master.zip
 # para2: the remote url of file,e.g.  https://codeload.github.com/strasdat/Sophus/zip/master 
 wget_file() {
@@ -65,14 +76,15 @@ wget_file() {
 }
 
 
-# show title of source code before compile and install
-install_src_title() {
+# func: show title of source code before compile and install
+# para: the title
+show_app_titile() {
 	msg_all " "
 	msg_all " "
 	msg_all "$@"
 }
 
-# install lib with source code
+# func:  install lib with source code
 # para1: the local file name
 # para2: the remote url
 # para3: dir name
@@ -89,6 +101,104 @@ install_src() {
 
 }
 
+# func:  install opencv 3.2.0
+install_opencv3_2_0() {
+	cd ~/Downloads
+
+	# opencv 
+	opencv_local_file="opencv-3.2.0.zip"
+	opencv_url="https://github.com/opencv/opencv/archive/3.2.0.zip"
+	wget_file ${opencv_local_file}  ${opencv_url}
+	if [ ! -d ~/Downloads/$opencv_local_file ]; then
+		exec_cmd_log "unzip -o $opencv_local_file"	
+	fi
+	
+	# opencv_contrib
+	contrib_local_file="opencv_contrib-3.2.0.zip"
+	contrib_url="https://github.com/opencv/opencv_contrib/archive/3.2.0.zip"
+	if [ ! -d ~/Downloads/${contrib_local_file} ]; then
+		wget_file ${contrib_local_file}  ${contrib_url}
+		exec_cmd_log "unzip -o ${contrib_local_file}"	
+	fi
+
+	# ippicv
+    opencv_ippicv_path="~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e"
+	mkdir -p ${opencv_ippicv_path}
+	ippicv_local_file="${opencv_ippicv_path}/ippicv_linux_20151201.tgz"
+	ippicv_url="https://raw.githubusercontent.com/Itseez/opencv_3rdparty/81a676001ca8075ada498583e4166079e5744668/ippicv/ippicv_linux_20151201.tgz"
+	if [ ! -f ${ippicv_local_file} ]; then
+		option='--no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16 -nv -c -O '
+		msg_all "ippicv_linux_20151201.tgz download ... "
+		wget $option ${ippicv_local_file}  ${ippicv_url} 
+	fi
+	
+	msg_all "opencv3.2.1 compile and install ..."
+	mkdir -p ~/Downloads/opencv-3.2.0/build && cd ~/Downloads/opencv-3.2.0/build
+    cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+		-D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
+		-D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
+		-D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
+		-D WITH_IPP=ON -D WITH_FFMPEG=ON -D FORCE_VTK=ON \
+		-D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
+		-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.2.0/modules .. "
+	exec_cmd_log $cmd
+	exec_cmd_all "make -j$(nproc)" 
+	exec_cmd_log "sudo make install"
+}
+
+install_opencv3_4_1() {
+	cd ~/Downloads
+
+	# opencv
+	opencv_local_file="opencv-3.4.1.zip"
+	opencv_url="https://codeload.github.com/opencv/opencv/zip/3.4.1"
+	wget_file ${opencv_local_file}  ${opencv_url}
+	if [ ! -f ~/Downloads/$opencv_local_file ]; then
+		exec_cmd_log "unzip -o $opencv_local_file"	
+	fi
+
+	# opencv_contrib
+	contrib_local_file="opencv_contrib-3.4.0.zip"
+	contrib_url="https://github.com/opencv/opencv_contrib/archive/3.4.0.zip"
+	wget_file ${contrib_local_file}  ${contrib_url}
+	if [ ! -d ~/Downloads/${contrib_local_file} ]; then
+		exec_cmd_log "unzip -o ${contrib_local_file}"	
+	fi
+
+	# opencv3.4 .cache directory ( include ippicv and others )
+	opencv_cache_file="opencv3.4.cache.zip"
+	msg_all "cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1"
+	cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1
+	cd ~/Downloads/opencv-3.4.1/
+    exec_cmd_log "unzip -o ${opencv_cache_file}"	
+	cd ~/Downloads
+
+	# ippicv
+#	mkdir -p ~/Downloads/opencv-3.4.1/.cache/ippicv/
+#	ippicv_local_file="~/Downloads/opencv-3.4.1/.cache/ippicv/4e0352ce96473837b1d671ce87f17359-ippicv_2017u3_lnx_intel64_general_20170822.tgz"
+#	ippicv_url="https://github.com/opencv/opencv_3rdparty/blob/ippicv/master_20170822/ippicv/ippicv_2017u3_lnx_intel64_general_20170822.tgz"
+#	if [ ! -f ${ippicv_local_file} ]; then
+#		option='--no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16 -nv -c -O '
+#		msg_all "ippicv_2017u3_lnx_intel64_general_20170822.tgz download ... "
+#		cd ~/Downloads/opencv-3.4.1/.cache/ippicv/
+#		wget ${option}  ${ippicv_local_file}  ${ippicv_url} 
+#		cd ~/Downloads
+#	fi
+
+	msg_all "opencv3.2.1 compile and install ..."	
+	mkdir -p ~/Downloads/opencv-3.4.1/build && cd ~/Downloads/opencv-3.4.1/build 
+    cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+			-D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
+			-D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
+			-D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
+			-D WITH_IPP=ON -D WITH_FFMPEG=ON   \
+			-D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
+			-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.4.0/modules .. "
+	exec_cmd_log $cmd
+	exec_cmd_all "make -j$(nproc)" 
+	exec_cmd_log "sudo make install"
+}
+
 # main process
 main() {
     # all package will download to ~/Downloads 
@@ -98,7 +208,10 @@ main() {
     mv ~/Downloads/install.log  ~/Downloads/install.log.bak
     touch ~/Downloads/install.log
 
-	msg_all "start installation. all information will be stored at $log_file"
+    msg_all ""
+	msg_all "------------------ Start installation ------------------"
+	msg_all "All information will be stored at $log_file."
+	msg_all ""
 
     # ToDo: replace the apt sources with domestic source 
 
@@ -129,131 +242,33 @@ main() {
 	install_lib "liblapacke-dev checkinstall libopenblas-dev phonon-backend-gstreamer phonon-backend-vlc"
 	#install_lib "adwaita-icon-theme adwaita-icon-theme-ful"
 
-    msg_all  " copy the eigen3 to /usr/local/include to avoid opencv3 compile problem "
+    msg_all  " copy the eigen3 to /usr/local/include to avoid opencv3 compile issue "
     exec_cmd_all "sudo cp -r /usr/include/eigen3/unsupported  /usr/local/include/"
 
-	install_src_title "------------------ Sophus ------------------"
+	show_app_titile "------------------ Sophus ------------------"
 	install_src  Sophus-master.zip https://codeload.github.com/strasdat/Sophus/zip/master   Sophus-master
 
-	install_src_title "------------------ Pangolin ------------------"
+	show_app_titile "------------------ Pangolin ------------------"
 	install_src   Pangolin-master.zip https://codeload.github.com/zzx2GH/Pangolin/zip/master   Pangolin-master
 
-	install_src_title "------------------ Ceres ------------------"
+	show_app_titile "------------------ Ceres ------------------"
 	install_src   ceres-solver-master.zip https://codeload.github.com/ceres-solver/ceres-solver/zip/master   ceres-solver-master
 
-	install_src_title "------------------ G2O ------------------"
+	show_app_titile "------------------ G2O ------------------"
 	install_src   g2o-master.zip https://codeload.github.com/RainerKuemmerle/g2o/zip/master   g2o-master
 
-
-	install_src_title "------------------ PCL ------------------"
+	show_app_titile "------------------ PCL ------------------"
 	install_src   pcl-master.zip https://codeload.github.com/PointCloudLibrary/pcl/zip/master    pcl-master
 
-	# todo: opencv 3.2.1
+	show_app_titile "------------------ Opencv 3.2.0 + contrib 3.2.0 + ippicv 20151201 ------------------"
+	install_opencv3_2_0
+
+	show_app_titile "------------------ Opencv 3.4.1 + contrib 3.4.0 + ippicv 20170822 ------------------"
+	install_opencv3_4_1
+
 }
 
+#
+# ----- main process ---------
+#
 main
-
-
-
-exit 0
-
-
-
-
-echo " "
-echo " "
-echo "------------------ opencv 3.2.1 ------------------ "  | tee -a ~/Downloads/install.log
-cd ~/Downloads
-if [ ! -f opencv-3.2.0.zip  ]; then   
-    echo "opencv: download..."   | tee -a ~/Downloads/install.log
-    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O opencv-3.2.0.zip https://github.com/opencv/opencv/archive/3.2.0.zip
-fi
-if [ ! -d ~/Downloads/opencv-3 ]; then
-    unzip -o opencv-3.2.0.zip    >>~/Downloads/install.log
-fi
-
-
-cd ~/Downloads
-if [ ! -f opencv_contrib-3.2.0.zip  ]; then 
-    echo "opencv-contrib: download..."  | tee -a ~/Downloads/install.log
-    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O opencv_contrib-3.2.0.zip  https://github.com/opencv/opencv_contrib/archive/3.2.0.zip
-fi
-if [ ! -d ~/Downloads/opencv_contrib-3.2.0 ]; then
-    unzip -o opencv_contrib-3.2.0.zip  >>~/Downloads/install.log
-fi
-
-
-cd ~/Downloads
-if [ ! -f ~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e/ippicv_linux_20151201.tgz ]; then 
-    echo "ippicv: download..."  | tee -a ~/Downloads/install.log
-    mkdir -p ~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e/
-    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O  ~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e/ippicv_linux_20151201.tgz  https://raw.githubusercontent.com/Itseez/opencv_3rdparty/81a676001ca8075ada498583e4166079e5744668/ippicv/ippicv_linux_20151201.tgz
-fi
-
-echo "opencv: compile & install..."  | tee -a ~/Downloads/install.log
-mkdir -p ~/Downloads/opencv-3.2.0/build && cd ~/Downloads/opencv-3.2.0/build 
-cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
-       -D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
-       -D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
-       -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
-       -D WITH_IPP=ON -D WITH_FFMPEG=ON -D FORCE_VTK=ON \
-       -D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
-       -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.2.0/modules ..   >>~/Downloads/install.log
-
-make -j"$(nproc)"  | tee -a ~/Downloads/install.log
-if [ $? -ne 0 ]; then
-    exit 1
-fi
-sudo make install   >>~/Downloads/install.log
-
-
-
-echo " "
-echo " "
-echo "------------------ opencv 3.4.1 ------------------ "  | tee -a ~/Downloads/install.log
-cd ~/Downloads
-if [ ! -f opencv-3.4.1.zip  ]; then   
-    echo "opencv: download..."   | tee -a ~/Downloads/install.log
-    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O opencv-3.4.1.zip  https://codeload.github.com/opencv/opencv/zip/3.4.1
-fi
-if [ ! -d ~/Downloads/opencv-3.4.1 ]; then
-    unzip -o opencv-3.4.1.zip   | tee -a ~/Downloads/install.log
-fi
-
-cd ~/Downloads
-if [ ! -f opencv_contrib-3.4.0.zip  ]; then 
-    echo "opencv-contrib: download..."  | tee -a ~/Downloads/install.log
-    wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O opencv_contrib-3.4.0.zip  https://github.com/opencv/opencv_contrib/archive/3.4.0.zip
-fi
-if [ ! -d ~/Downloads/opencv_contrib-3.4.0 ]; then
-    unzip -o opencv_contrib-3.4.0.zip   | tee -a ~/Downloads/install.log
-fi
-
-cp ~/Downloads/opencv3.4.cache.zip  ~/Downloads/opencv-3.4.1
-cd ~/Downloads/opencv-3.4.1/
-unzip -o opencv3.4.cache.zip    | tee -a ~/Downloads/install.log
-
-
-cd ~/Downloads
-if [ ! -f ~/Downloads/opencv-3.4.1/.cache/ippicv/4e0352ce96473837b1d671ce87f17359-ippicv_2017u3_lnx_intel64_general_20170822.tgz ]; then 
-     echo "ippicv: download..."  | tee -a ~/Downloads/install.log
-     mkdir -p ~/Downloads/opencv-3.4.1/.cache/ippicv/
-     wget --no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" -nv -c -O ~/Downloads/opencv-3.4.1/.cache/ippicv/4e0352ce96473837b1d671ce87f17359-ippicv_2017u3_lnx_intel64_general_20170822.tgz  https://github.com/opencv/opencv_3rdparty/blob/ippicv/master_20170822/ippicv/ippicv_2017u3_lnx_intel64_general_20170822.tgz
-fi
-
-echo "opencv: compile & install..."  | tee -a ~/Downloads/install.log
-mkdir -p ~/Downloads/opencv-3.4.1/build && cd ~/Downloads/opencv-3.4.1/build 
-cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
-       -D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
-       -D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
-       -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
-       -D WITH_IPP=ON -D WITH_FFMPEG=ON   \
-       -D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
-       -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.4.0/modules ..     | tee -a ~/Downloads/install.log
-
-make -j"$(nproc)"  | tee -a ~/Downloads/install.log
-if [ $? -ne 0 ]; then
-    exit 1
-fi
-sudo make install   >>~/Downloads/install.log
-
