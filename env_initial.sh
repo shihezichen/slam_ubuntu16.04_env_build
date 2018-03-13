@@ -247,9 +247,11 @@ main() {
     msg_all " "
 	msg_all "-----------------------------------------------------------------------"
 	msg_all "The program will install most depend libraries of SLAM"
-	msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV"
+	msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV "
+	msg_all "It will take several hours to finish all of them. Good Luck!"
+	msg_all " "
 	msg_all "Start at : $(date) "
-	msg_all "All install log will be stored at $log_file.  "
+	msg_all "All install information will be recorded in $log_file.  "
 	msg_all "-----------------------------------------------------------------------"
 
 	# apt update
