@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/dash
 
 # description: build the slam development environment .
 #     include the dependency libraries, Eigen3, Sophus, Pangolin, Ceres, G2O, 
