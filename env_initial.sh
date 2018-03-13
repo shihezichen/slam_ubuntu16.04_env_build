@@ -6,7 +6,7 @@
 
 # Author: shihezichen@live.cn
 
-
+# global variables
 # the install log file
 log_file=~/Downloads/install.log
 log_file_bak=${log_file}.bak
@@ -14,7 +14,7 @@ log_file_bak=${log_file}.bak
 # func: show message at screen 
 # para: message to show
 msg(){ 
-    echo $@
+    echo $*
 }
 
 # func: show message at screen and logfile
@@ -26,7 +26,7 @@ msg_all(){
 # func: execute the cmd without any cmd show at screen, and store the process to log file record
 # para: the cmd 
 exec_cmd_quiet() {
-     $@ >> $log_file
+     eval $* >> $log_file
 	 if [ $? -ne 0 ]; then
 	     msg_all " "
 	     msg_all "ERROR!  exit with code 1"
@@ -37,15 +37,15 @@ exec_cmd_quiet() {
 # func:  execute the cmd with cmd show at screen, and store the process to log file record
 # para: the cmd 
 exec_cmd_log() {
-     msg_all "$@"
+     msg_all "-- $@"
 	 exec_cmd_quiet $@
 }
 
 # func:  execute the cmd and show proecess at screen and store them to log file record
 # para: the cmd
 exec_cmd_all() {
-     msg_all "$@"
-     $@ | tee -a  $log_file
+     msg_all "-- $*"
+     eval $* | tee -a  $log_file
 	 if [ $? -ne 0 ]; then
 	     msg_all " "
 	     msg_all "ERROR!  exit with code 1"
@@ -57,10 +57,10 @@ exec_cmd_all() {
 # para: the libs' name
 install_lib() {
    msg_all " "
-   msg_all "install $@"
-   exec_cmd_quiet "sudo apt-get install -y $@"
+   msg_all "check and install $*"
+   exec_cmd_quiet "sudo apt-get install -y $*"
    if [ $? -eq 0 ]; then
-	msg_all "done."
+	    msg_all "done."
    fi
 }
 
@@ -68,13 +68,18 @@ install_lib() {
 # para1: the local file name, e.g. Sophus-master.zip
 # para2: the remote url of file,e.g.  https://codeload.github.com/strasdat/Sophus/zip/master 
 wget_file() {
-    option='--no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16 -nv -c -O '
-    if [ ! -f "$1" ]; then 
+    #option='--no-check-certificate -nv -c -O '
+	option='--no-check-certificate -c -O '
+	file=~/Downloads/$1
+    if [ ! -f $file ]; then 
 		msg_all "$1 download ... "
-		exec_cmd_quiet wget $option ~/Downloads/$1  $2
+		exec_cmd_all "wget $option  $file   $2"
+		if [ ! -f $file ]; then
+			msg_all "ERROR: can't download file $file. "
+			exit 1
+		fi
 	fi
 }
-
 
 # func: show title of source code before compile and install
 # para: the title
@@ -93,11 +98,12 @@ install_src() {
 	wget_file $1 $2
 	exec_cmd_log "unzip -o $1"
 	msg_all "$1 compile and install ..."
-	exec_cmd_log "mkdir -p ~/Downloads/$3/build"
+	exec_cmd_log mkdir -p ~/Downloads/$3/build
 	cd ~/Downloads/$3/build
     exec_cmd_log "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
 	exec_cmd_all "make -j$(nproc)" 
 	exec_cmd_log "sudo make install"
+	cd ~/Downloads
 
 }
 
@@ -109,11 +115,12 @@ install_opencv3_2_0() {
 	opencv_local_file="opencv-3.2.0.zip"
 	opencv_url="https://github.com/opencv/opencv/archive/3.2.0.zip"
 	wget_file ${opencv_local_file}  ${opencv_url}
-	if [ ! -d ~/Downloads/$opencv_local_file ]; then
+	if [ ! -d ~/Downloads/opencv-3.2.0 ]; then
 		exec_cmd_log "unzip -o $opencv_local_file"	
 	fi
 	
 	# opencv_contrib
+	cd ~/Downloads
 	contrib_local_file="opencv_contrib-3.2.0.zip"
 	contrib_url="https://github.com/opencv/opencv_contrib/archive/3.2.0.zip"
 	if [ ! -d ~/Downloads/${contrib_local_file} ]; then
@@ -122,17 +129,15 @@ install_opencv3_2_0() {
 	fi
 
 	# ippicv
-    opencv_ippicv_path="~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e"
+	cd ~/Downloads
+	ippicv_local_file="ippicv_linux_20151201.tgz"
+    opencv_ippicv_path=~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e
 	mkdir -p ${opencv_ippicv_path}
-	ippicv_local_file="${opencv_ippicv_path}/ippicv_linux_20151201.tgz"
 	ippicv_url="https://raw.githubusercontent.com/Itseez/opencv_3rdparty/81a676001ca8075ada498583e4166079e5744668/ippicv/ippicv_linux_20151201.tgz"
-	if [ ! -f ${ippicv_local_file} ]; then
-		option='--no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16 -nv -c -O '
-		msg_all "ippicv_linux_20151201.tgz download ... "
-		wget $option ${ippicv_local_file}  ${ippicv_url} 
-	fi
+	wget_file  $ippicv_local_file  $ippicv_url 
+	exec_cmd_log "cp ${ippicv_local_file}  ${opencv_ippicv_path}"
 	
-	msg_all "opencv3.2.1 compile and install ..."
+	msg_all "opencv3.2.1 compile and install at ~/Downloads/opencv-3.2.0/build..."
 	mkdir -p ~/Downloads/opencv-3.2.0/build && cd ~/Downloads/opencv-3.2.0/build
     cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
 		-D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
@@ -146,6 +151,7 @@ install_opencv3_2_0() {
 	exec_cmd_log "sudo make install"
 }
 
+# func:  install opencv 3.4.1
 install_opencv3_4_1() {
 	cd ~/Downloads
 
@@ -174,16 +180,17 @@ install_opencv3_4_1() {
 	cd ~/Downloads
 
 	# ippicv
-#	mkdir -p ~/Downloads/opencv-3.4.1/.cache/ippicv/
-#	ippicv_local_file="~/Downloads/opencv-3.4.1/.cache/ippicv/4e0352ce96473837b1d671ce87f17359-ippicv_2017u3_lnx_intel64_general_20170822.tgz"
-#	ippicv_url="https://github.com/opencv/opencv_3rdparty/blob/ippicv/master_20170822/ippicv/ippicv_2017u3_lnx_intel64_general_20170822.tgz"
-#	if [ ! -f ${ippicv_local_file} ]; then
-#		option='--no-check-certificate --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16 -nv -c -O '
-#		msg_all "ippicv_2017u3_lnx_intel64_general_20170822.tgz download ... "
-#		cd ~/Downloads/opencv-3.4.1/.cache/ippicv/
-#		wget ${option}  ${ippicv_local_file}  ${ippicv_url} 
-#		cd ~/Downloads
-#	fi
+	cd ~/Downloads
+	mkdir -p ~/Downloads/opencv-3.4.1/.cache/ippicv/
+	ippicv_local_file="ippicv_2017u3_lnx_intel64_general_20170822.tgz"
+	ippicv_local_file_in_opencv="~/Downloads/opencv-3.4.1/.cache/ippicv/4e0352ce96473837b1d671ce87f17359-ippicv_2017u3_lnx_intel64_general_20170822.tgz"
+	ippicv_url="https://github.com/opencv/opencv_3rdparty/blob/ippicv/master_20170822/ippicv/ippicv_2017u3_lnx_intel64_general_20170822.tgz"
+	if [ ! -f ${ippicv_local_file} ]; then
+		wget_file 	$ippicv_local_file  $ippicv_url
+	fi
+	exec_cmd_log cp  ${ippicv_local_file}  ${ippicv_local_file_in_opencv}
+	cd ~/Downloads
+
 
 	msg_all "opencv3.2.1 compile and install ..."	
 	mkdir -p ~/Downloads/opencv-3.4.1/build && cd ~/Downloads/opencv-3.4.1/build 
@@ -199,30 +206,8 @@ install_opencv3_4_1() {
 	exec_cmd_log "sudo make install"
 }
 
-# main process
-main() {
-    # all package will download to ~/Downloads 
-    mkdir -p  ~/Downloads && cd ~/Downloads
-
-	# create new log file and back old log file
-    mv ~/Downloads/install.log  ~/Downloads/install.log.bak
-    touch ~/Downloads/install.log
-
-    msg_all ""
-	msg_all "------------------ Start installation ------------------"
-	msg_all "All information will be stored at $log_file."
-	msg_all ""
-
-    # ToDo: replace the apt sources with domestic source 
-
-    # apt update
-    exec_cmd_log "sudo apt-get update"
-
-
-    msg_all  " "
-	msg_all  " "
-	msg_all  "------------------ apt install all depend libraries ------------------"
-
+# func:  install all depend libraries
+install_depend_libs() {
 	install_lib "vim g++ unzip wget git git-core build-essential cmake  doxygen"
 	install_lib "freeglut3 freeglut3-dbg freeglut3-dev gfortran graphviz libgtk2.0-dev"
 	install_lib "libatlas-base-dev libavcodec-dev libavformat-dev libeigen3-dev  "
@@ -241,6 +226,31 @@ main() {
 	# opencv --use lapack,
 	install_lib "liblapacke-dev checkinstall libopenblas-dev phonon-backend-gstreamer phonon-backend-vlc"
 	#install_lib "adwaita-icon-theme adwaita-icon-theme-ful"
+}
+
+
+# main process
+main() {
+    # all package will download to ~/Downloads 
+    mkdir -p  ~/Downloads && cd ~/Downloads
+
+	# create new log file and back old log file
+    mv ~/Downloads/install.log  ~/Downloads/install.log.bak  2>/dev/null
+    touch ~/Downloads/install.log
+
+    msg_all " "
+	msg_all "---------------------- Start installation ----------------------------"
+	msg_all "   All information will be stored at $log_file.  "
+	msg_all "   Maybe you need input the root password for sudo.  "
+	msg_all "-----------------------------------------------------------------------"
+
+	# apt update
+    msg_all  " "
+    exec_cmd_all "sudo apt-get update"
+
+    msg_all  " "
+	msg_all  "------------------ apt install all depend libraries ------------------"
+    install_depend_libs
 
     msg_all  " copy the eigen3 to /usr/local/include to avoid opencv3 compile issue "
     exec_cmd_all "sudo cp -r /usr/include/eigen3/unsupported  /usr/local/include/"
@@ -252,7 +262,7 @@ main() {
 	install_src   Pangolin-master.zip https://codeload.github.com/zzx2GH/Pangolin/zip/master   Pangolin-master
 
 	show_app_titile "------------------ Ceres ------------------"
-	install_src   ceres-solver-master.zip https://codeload.github.com/ceres-solver/ceres-solver/zip/master   ceres-solver-master
+	install_src   Ceres-solver-master.zip https://codeload.github.com/ceres-solver/ceres-solver/zip/master  Ceres-solver-master
 
 	show_app_titile "------------------ G2O ------------------"
 	install_src   g2o-master.zip https://codeload.github.com/RainerKuemmerle/g2o/zip/master   g2o-master
@@ -263,8 +273,8 @@ main() {
 	show_app_titile "------------------ Opencv 3.2.0 + contrib 3.2.0 + ippicv 20151201 ------------------"
 	install_opencv3_2_0
 
-	show_app_titile "------------------ Opencv 3.4.1 + contrib 3.4.0 + ippicv 20170822 ------------------"
-	install_opencv3_4_1
+	#show_app_titile "------------------ Opencv 3.4.1 + contrib 3.4.0 + ippicv 20170822 ------------------"
+	#install_opencv3_4_1
 
 }
 
@@ -272,3 +282,4 @@ main() {
 # ----- main process ---------
 #
 main
+
