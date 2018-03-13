@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/dash
 
 # description: reset the environment: delete all downloads packages.
 # it is often used when previous installation is interrupted abnormally.
