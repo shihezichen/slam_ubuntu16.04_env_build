@@ -23,10 +23,16 @@ msg_all(){
     echo $@ | tee -a $log_file
 }
 
+# func: just store info to logfile
+# para: message to store to logfile
+msg_log() {
+	echo $@ >> $log_file
+}
+
 # func: execute the cmd without any cmd show at screen, and store the process to log file record
 # para: the cmd 
 exec_cmd_quiet() {
-     eval $* >> $log_file
+     eval $* >> $log_file  2>&1
 	 if [ $? -ne 0 ]; then
 	     msg_all " "
 	     msg_all "ERROR!  exit with code 1"
@@ -45,7 +51,7 @@ exec_cmd_log() {
 # para: the cmd
 exec_cmd_all() {
      msg_all "-- $*"
-     eval $* | tee -a  $log_file
+     eval $* | tee -a  $log_file 
 	 if [ $? -ne 0 ]; then
 	     msg_all " "
 	     msg_all "ERROR!  exit with code 1"
@@ -231,12 +237,6 @@ install_depend_libs() {
 
 # main process
 main() {
-	msg_all "Ehe program will install most depend libraries of SLAM."
-	msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV"
-	msg_all "Good Luck!"
-	msg_all " "
-
-
     # all package will download to ~/Downloads 
     mkdir -p  ~/Downloads && cd ~/Downloads
 
@@ -245,14 +245,18 @@ main() {
     touch ~/Downloads/install.log
 
     msg_all " "
-	msg_all "---------------------- Start installation ----------------------------"
-	msg_all "   All information will be stored at $log_file.  "
-	msg_all "   Maybe you need input the root password for sudo.  "
+	msg_all "-----------------------------------------------------------------------"
+	msg_all "The program will install most depend libraries of SLAM"
+	msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV"
+	msg_all "Start at : $(date) "
+	msg_all "All install log will be stored at $log_file.  "
 	msg_all "-----------------------------------------------------------------------"
 
 	# apt update
     msg_all  " "
+	msg_all "Maybe you need input the root password for sudo execution.  "
     exec_cmd_all "sudo apt-get update"
+
 
     msg_all  " "
 	msg_all  "------------------ apt install all depend libraries ------------------"
@@ -268,7 +272,7 @@ main() {
 	install_src   Pangolin-master.zip https://codeload.github.com/zzx2GH/Pangolin/zip/master   Pangolin-master
 
 	show_app_titile "------------------ Ceres ------------------"
-	install_src   Ceres-solver-master.zip https://codeload.github.com/ceres-solver/ceres-solver/zip/master  Ceres-solver-master
+	install_src   ceres-solver-master.zip https://codeload.github.com/ceres-solver/ceres-solver/zip/master  ceres-solver-master
 
 	show_app_titile "------------------ G2O ------------------"
 	install_src   g2o-master.zip https://codeload.github.com/RainerKuemmerle/g2o/zip/master   g2o-master
