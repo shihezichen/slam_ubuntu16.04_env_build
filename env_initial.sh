@@ -64,7 +64,7 @@ install_lib() {
    fi
 }
 
-# func: download file to local directory '~/Downloads'
+# func: download file to local directory '~/Downloads' if it doesn't exist
 # para1: the local file name, e.g. Sophus-master.zip
 # para2: the remote url of file,e.g.  https://codeload.github.com/strasdat/Sophus/zip/master 
 wget_file() {
@@ -97,7 +97,7 @@ install_src() {
 	cd ~/Downloads
 	wget_file $1 $2
 	exec_cmd_log "unzip -o $1"
-	msg_all "$1 compile and install ..."
+	msg_all "$3 compile and install ..."
 	exec_cmd_log mkdir -p ~/Downloads/$3/build
 	cd ~/Downloads/$3/build
     exec_cmd_log "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
@@ -231,6 +231,12 @@ install_depend_libs() {
 
 # main process
 main() {
+	msg_all "Ehe program will install most depend libraries of SLAM."
+	msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV"
+	msg_all "Good Luck!"
+	msg_all " "
+
+
     # all package will download to ~/Downloads 
     mkdir -p  ~/Downloads && cd ~/Downloads
 
