@@ -11,3 +11,7 @@ Test successfully at ubuntu 16.04 LTS.
 
 # Author
 shihezichen@live.cn
+
+# Usage
+install packages:  env_initial.sh
+remove all download packages:  env_reset.sh
