@@ -35,7 +35,8 @@ exec_cmd_quiet() {
      eval $* >> $log_file  2>&1
 	 if [ $? -ne 0 ]; then
 	     msg_all " "
-	     msg_all "ERROR!  exit with code 1"
+	     msg_all "ERROR!  exit with code 1.  "
+		 msg_all "please to see the $log_file to get the detailed information."
 		 exit 1
 	 fi
 }
@@ -84,6 +85,9 @@ wget_file() {
 			msg_all "ERROR: can't download file $file. "
 			exit 1
 		fi
+	else
+		msg_all "INFO: FIND $1 FILE, REUSE IT. "
+		msg_all "INFO: Please remove the file $1 and try again if you want re-download it."		
 	fi
 }
 
@@ -102,7 +106,12 @@ show_app_titile() {
 install_src() {
 	cd ~/Downloads
 	wget_file $1 $2
-	exec_cmd_log "unzip -o $1"
+	if [ ! -d ~/Downloads/$3 ]; then
+		exec_cmd_log "unzip -o $1"
+	else
+		msg_all "INFO: FIND $3 DIRECTORY, REUSE IT. "
+		msg_all "INFO: Please remove the directory $3  and try again if you want re-unzip $2 and overwrite $3 directory."
+	fi
 	msg_all "$3 compile and install ..."
 	exec_cmd_log mkdir -p ~/Downloads/$3/build
 	cd ~/Downloads/$3/build
@@ -178,7 +187,16 @@ install_opencv3_4_1() {
 	fi
 
 	# opencv3.4 .cache directory ( include ippicv and others )
+	#
+	# IMPORTANT: you should download opencv3.4.cache.zip manually and put it at ~/Downloads
+	#
 	opencv_cache_file="opencv3.4.cache.zip"
+	if [ ! -f ~/Downloads/${opencv_cache_file} ]; then
+	    echo ""
+		echo "ERROR: Can't find the file ~/Downloads/${opencv_cache_file} . "
+		echo "Please download the $opencv_cache_file and put it at ~/Downloads and run me again."
+		exit 1
+	fi
 	msg_all "cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1"
 	cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1
 	cd ~/Downloads/opencv-3.4.1/
@@ -249,8 +267,8 @@ main() {
 	msg_all "The program will install most depend libraries of SLAM"
 	msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV "
 	msg_all "It will take several hours to finish all of them. Good Luck!"
-	msg_all " "
-	msg_all "Start at : $(date) "
+	msg_all ". "
+	msg_all "This installation starts at : $(date) "
 	msg_all "All install information will be recorded in $log_file.  "
 	msg_all "-----------------------------------------------------------------------"
 
