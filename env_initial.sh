@@ -86,8 +86,8 @@ wget_file() {
 			exit 1
 		fi
 	else
-		msg_all "INFO: FIND $1 FILE, REUSE IT. "
-		msg_all "INFO: Please remove the file $1 and try again if you want re-download it."		
+		msg_all "WARNING: FIND $1 FILE, REUSE IT. "
+		msg_all "WARNING: Please remove the file $1 and try again if you want re-download it."		
 	fi
 }
 
@@ -109,14 +109,14 @@ install_src() {
 	if [ ! -d ~/Downloads/$3 ]; then
 		exec_cmd_log "unzip -o $1"
 	else
-		msg_all "INFO: FIND $3 DIRECTORY, REUSE IT. "
-		msg_all "INFO: Please remove the directory $3  and try again if you want re-unzip $2 and overwrite $3 directory."
+		msg_all "WARNING: FIND $3 DIRECTORY, REUSE IT. "
+		msg_all "WARNING: Please remove the directory $3  and try again if you want re-unzip $1 and overwrite ~/Downloads/$3 directory."
 	fi
 	msg_all "$3 compile and install ..."
 	exec_cmd_log mkdir -p ~/Downloads/$3/build
 	cd ~/Downloads/$3/build
     exec_cmd_log "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
-	exec_cmd_all "make -j$(nproc)" 
+	exec_cmd_all "make  -j$(nproc)" 
 	exec_cmd_log "sudo make install"
 	cd ~/Downloads
 
