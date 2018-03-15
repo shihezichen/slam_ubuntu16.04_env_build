@@ -9,7 +9,7 @@
 
 # cd current shell file directory
 cur_path=$(cd `dirname $0`;pwd)
-cd $cur_pwd
+cd $cur_path
 
 # include the common fucntions library file
 .  ${cur_path}/common_funcs.inc
