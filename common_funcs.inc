@@ -131,7 +131,7 @@ install_eigen3_3_5() {
 	if [ ! -d ~/Downloads/eigen-3.3.5 ]; then
 		exec_cmd_log "unzip -d ~/Downloads/eigen-3.3.5 -o ${eigen_local_file}"
 	fi
-	exec_cmd_log "sudo cp -pr eigen-3.3.5/eigen-eigen-b3f3d4950030  /usr/include/eigen-3.3.5"
+	exec_cmd_log "sudo cp -pr eigen-3.3.5/eigen-eigen-b3f3d4950030  /usr/include/eigen3"
 	exec_cmd_log "sudo cp -pr eigen-3.3.5/eigen-eigen-b3f3d4950030/Eigen /usr/include"
 }
 
