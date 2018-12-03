@@ -54,7 +54,7 @@ main() {
     msg_all ". "
     msg_all "This installation starts at : $(date) "
     msg_all "All install information will be recorded in $log_file.  "
-    msg_all "NOTE: please prepare the file ~/Downloads/opencv3.4.cache.zip for OpenCV "
+    msg_all "NOTE: please prepare the file ~/Downloads/opencv3.4.cache.zip for OpenCV 3.4 "
     msg_all "      download url :https://download.csdn.net/download/u010342901/10173967"
     msg_all "-----------------------------------------------------------------------"
 
