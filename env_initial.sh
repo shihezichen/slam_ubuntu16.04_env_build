@@ -18,7 +18,7 @@ cd $cur_path
 install_depend_libs() {
     install_lib "vim g++ unzip wget git git-core build-essential cmake  doxygen"
     install_lib "freeglut3 freeglut3-dbg freeglut3-dev gfortran graphviz libgtk2.0-dev"
-    install_lib "libatlas-base-dev libavcodec-dev libavformat-dev"
+    install_lib "libatlas-base-dev libavcodec-dev libavformat-dev libeigen3-dev  "
     install_lib "libboost-dev libboost-filesystem-dev libboost-system1.58-dev libboost-thread-dev   "
     install_lib "libcholmod3.0.6 ccache libcxsparse3.1.4 libflann-dev  libflann1.8"
     install_lib "libgflags-dev libglew-dev libgoogle-glog-dev libgtest-dev libboost-all-dev libqhull*"
@@ -54,6 +54,8 @@ main() {
     msg_all ". "
     msg_all "This installation starts at : $(date) "
     msg_all "All install information will be recorded in $log_file.  "
+    msg_all "NOTE: please prepare the file ~/Downloads/opencv3.4.cache.zip for OpenCV "
+    msg_all "      download url :https://download.csdn.net/download/u010342901/10173967"
     msg_all "-----------------------------------------------------------------------"
 
     # apt update
