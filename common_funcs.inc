@@ -120,6 +120,21 @@ install_src() {
 
 }
 
+# func: install Eigen3 from sourc
+install_eigen3_3_5() {
+	cd ~/Downloads
+
+	# eigen3
+	eigen_local_file="eigen-3.3.5.zip"
+	eigen_url="http://bitbucket.org/eigen/eigen/get/3.3.5.zip"
+	wget_file ${eigen_local_file}  ${eigen_url}
+	if [ ! -d ~/Downloads/eigen-3.3.5 ]; then
+		exec_cmd_log "unzip -d ~/Downloads/eigen-3.3.5 -o ${eigen_local_file}"
+	fi
+	exec_cmd_log "sudo cp -pr eigen-3.3.5/eigen-eigen-b3f3d4950030  /usr/include/eigen-3.3.5"
+	exec_cmd_log "sudo cp -pr eigen-3.3.5/eigen-eigen-b3f3d4950030/Eigen /usr/include"
+}
+
 # func:  install opencv 3.2.0
 install_opencv3_2_0() {
 	cd ~/Downloads
