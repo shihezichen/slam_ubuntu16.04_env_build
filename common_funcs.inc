@@ -151,7 +151,7 @@ install_opencv3_2_0() {
 	cd ~/Downloads
 	contrib_local_file="opencv_contrib-3.2.0.zip"
 	contrib_url="https://github.com/opencv/opencv_contrib/archive/3.2.0.zip"
-	if [ ! -d ~/Downloads/${contrib_local_file} ]; then
+	if [ ! -f ~/Downloads/${contrib_local_file} ]; then
 		wget_file ${contrib_local_file}  ${contrib_url}
 		exec_cmd_log "unzip -o ${contrib_local_file}"	
 	fi
@@ -186,8 +186,10 @@ install_opencv3_4_1() {
 	# opencv
 	opencv_local_file="opencv-3.4.1.zip"
 	opencv_url="https://codeload.github.com/opencv/opencv/zip/3.4.1"
-	wget_file ${opencv_local_file}  ${opencv_url}
 	if [ ! -f ~/Downloads/$opencv_local_file ]; then
+		wget_file ${opencv_local_file}  ${opencv_url}
+	fi
+	if [ ! -d ~/Downloads/opencv-3.4.1 ]; then
 		exec_cmd_log "unzip -o $opencv_local_file"	
 	fi
 
@@ -213,7 +215,7 @@ install_opencv3_4_1() {
 	msg_all "cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1"
 	cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1
 	cd ~/Downloads/opencv-3.4.1/
-    exec_cmd_log "unzip -o ${opencv_cache_file}"	
+	exec_cmd_log "unzip -o ${opencv_cache_file}"	
 	cd ~/Downloads
 
 	# ippicv
