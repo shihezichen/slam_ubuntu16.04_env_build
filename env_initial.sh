@@ -20,7 +20,7 @@ install_depend_libs() {
     install_lib "freeglut3 freeglut3-dbg freeglut3-dev gfortran graphviz libgtk2.0-dev"
     install_lib "libatlas-base-dev libavcodec-dev libavformat-dev libeigen3-dev  "
     install_lib "libboost-dev libboost-filesystem-dev libboost-system1.58-dev libboost-thread-dev   "
-    install_lib "libcholmod3.0.6 ccache libcxsparse3.1.4 libeigen3-dev libflann-dev  libflann1.8"
+    install_lib "libcholmod3.0.6 ccache libcxsparse3.1.4 libflann-dev  libflann1.8"
     install_lib "libgflags-dev libglew-dev libgoogle-glog-dev libgtest-dev libboost-all-dev libqhull*"
     install_lib "libjasper-dev libjpeg8-dev libpng-dev libtiff-dev  libjpeg-dev libdc1394-22-dev liblapack-dev "
     install_lib "libphonon-dev libpng12-dev libqglviewer2 libqglviewer-dev libqhull-dev libopenexr-dev libpcap-dev "
@@ -66,9 +66,10 @@ main() {
     msg_all  "------------------ apt install all depend libraries ------------------"
     install_depend_libs
 
-    msg_all  " copy the eigen3 to /usr/local/include to avoid opencv3 compile issue "
-    exec_cmd_all "sudo cp -r /usr/include/eigen3/unsupported  /usr/local/include/"
-
+    #msg_all  " copy the eigen3 to /usr/local/include to avoid opencv3 compile issue "
+    #exec_cmd_all "sudo cp -r /usr/include/eigen3/Eigen /usr/local/include/"
+    install_eigen3_3_5
+    
     show_app_titile "------------------ Sophus ------------------"
     install_src  Sophus-master.zip https://codeload.github.com/strasdat/Sophus/zip/master   Sophus-master
 
@@ -84,11 +85,11 @@ main() {
     show_app_titile "------------------ PCL ------------------"
     install_src   pcl-master.zip https://codeload.github.com/PointCloudLibrary/pcl/zip/master    pcl-master
 
-    show_app_titile "------------------ Opencv 3.2.0 + contrib 3.2.0 + ippicv 20151201 ------------------"
-    install_opencv3_2_0
+    #show_app_titile "------------------ Opencv 3.2.0 + contrib 3.2.0 + ippicv 20151201 ------------------"
+    #install_opencv3_2_0
 
-    #show_app_titile "------------------ Opencv 3.4.1 + contrib 3.4.0 + ippicv 20170822 ------------------"
-    #install_opencv3_4_1
+    show_app_titile "------------------ Opencv 3.4.1 + contrib 3.4.0 + ippicv 20170822 ------------------"
+    install_opencv3_4_1
 
 }
 
