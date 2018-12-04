@@ -113,7 +113,7 @@ install_src() {
 	msg_all "$3 compile and install ..."
 	exec_cmd_log mkdir -p ~/Downloads/$3/build
 	cd ~/Downloads/$3/build
-    exec_cmd_log "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
+        exec_cmd_log "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
 	exec_cmd_all "make  -j$(nproc)" 
 	exec_cmd_log "sudo make install"
 	cd ~/Downloads
@@ -174,7 +174,7 @@ install_opencv3_2_0() {
 		-D WITH_IPP=ON -D WITH_FFMPEG=ON -D FORCE_VTK=ON \
 		-D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
 		-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.2.0/modules .. "
-	exec_cmd_log $cmd
+	exec_cmd_all $cmd
 	exec_cmd_all "make -j$(nproc)" 
 	exec_cmd_log "sudo make install"
 }
@@ -205,18 +205,18 @@ install_opencv3_4_1() {
 	#
 	# IMPORTANT: you should download opencv3.4.cache.zip manually and put it at ~/Downloads
 	#
-	opencv_cache_file="opencv3.4.cache.zip"
-	if [ ! -f ~/Downloads/${opencv_cache_file} ]; then
-	    echo ""
-		echo "ERROR: Can't find the file ~/Downloads/${opencv_cache_file} . "
-		echo "Please download the $opencv_cache_file and put it at ~/Downloads and run me again."
-		exit 1
-	fi
+	#opencv_cache_file="opencv3.4.cache.zip"
+	#if [ ! -f ~/Downloads/${opencv_cache_file} ]; then
+	#    echo ""
+	#	echo "ERROR: Can't find the file ~/Downloads/${opencv_cache_file} . "
+	#	echo "Please download the $opencv_cache_file and put it at ~/Downloads and run me again."
+	#	exit 1
+	#fi
 	msg_all "cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1"
-	cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1
-	cd ~/Downloads/opencv-3.4.1/
-	exec_cmd_log "unzip -o ${opencv_cache_file}"	
-	cd ~/Downloads
+	#cp ~/Downloads/${opencv_cache_file}  ~/Downloads/opencv-3.4.1
+	#cd ~/Downloads/opencv-3.4.1/
+	#exec_cmd_log "unzip -o ${opencv_cache_file}"	
+	#cd ~/Downloads
 
 	# ippicv
 	cd ~/Downloads
@@ -225,22 +225,23 @@ install_opencv3_4_1() {
 	ippicv_local_file_in_opencv="~/Downloads/opencv-3.4.1/.cache/ippicv/4e0352ce96473837b1d671ce87f17359-ippicv_2017u3_lnx_intel64_general_20170822.tgz"
 	ippicv_url="https://github.com/opencv/opencv_3rdparty/blob/ippicv/master_20170822/ippicv/ippicv_2017u3_lnx_intel64_general_20170822.tgz"
 	if [ ! -f ${ippicv_local_file} ]; then
-		wget_file 	$ippicv_local_file  $ippicv_url
+		wget_file $ippicv_local_file  $ippicv_url
 	fi
 	exec_cmd_log cp  ${ippicv_local_file}  ${ippicv_local_file_in_opencv}
+	# line47 replace to local path of ippicv tgz 
+	sed -i '47c "~/Downloads/ippicv_2017u3_lnx_intel64_general_20170822.tgz"' ~/Downloads/opencv-3.4.1/3rdparty/ippicv/ippicv.cmake 
 	cd ~/Downloads
-
 
 	msg_all "opencv3.2.1 compile and install ..."	
 	mkdir -p ~/Downloads/opencv-3.4.1/build && cd ~/Downloads/opencv-3.4.1/build 
-    cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+        cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
 			-D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
 			-D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
 			-D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
 			-D WITH_IPP=ON -D WITH_FFMPEG=ON   \
 			-D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
 			-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.4.0/modules .. "
-	exec_cmd_log $cmd
+	exec_cmd_all $cmd
 	exec_cmd_all "make -j$(nproc)" 
 	exec_cmd_log "sudo make install"
 }
