@@ -58,10 +58,6 @@ main() {
     msg_all "      download url :https://download.csdn.net/download/u010342901/10173967"
     msg_all "-----------------------------------------------------------------------"
 
-    show_app_titile "------------------ Opencv 3.4.1 + contrib 3.4.0 + ippicv 20170822 ------------------"
-    install_opencv3_4_1
-    exit
-
     # apt update
     msg_all  " "
     msg_all "Maybe you need input the root password for sudo execution.  "
