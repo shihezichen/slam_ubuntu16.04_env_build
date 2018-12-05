@@ -113,11 +113,31 @@ install_src() {
 	msg_all "$3 compile and install ..."
 	exec_cmd_log mkdir -p ~/Downloads/$3/build
 	cd ~/Downloads/$3/build
-        exec_cmd_log "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
+        exec_cmd_all "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
 	exec_cmd_all "make  -j$(nproc)" 
-	exec_cmd_log "sudo make install"
+	exec_cmd_all "sudo make install"
 	cd ~/Downloads
 
+}
+
+# func: install g++-6 from ppa
+install_gcc6() {
+	msg_all "install g++-6 from ppa ..."
+	msg_all " "
+	msg_all "add the new repository ppa of g++-6 to os..."
+
+	sudo apt-get install build-essential software-properties-common -y && \
+	sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
+	sudo apt-get update  && \
+	sudo apt-get install gcc-snapshot -y  && \
+	sudo apt-get install gcc-6 g++-6 -y  && \
+	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6 
+	if [ $? -ne 0 ]; then
+	    msg_all "ERROR: can't install g++-6."
+	    exit
+	else
+	    msg_all "install g++-6 successfully!"
+	fi
 }
 
 # func: install Eigen3 from sourc
@@ -159,7 +179,7 @@ install_opencv3_2_0() {
 	# ippicv
 	cd ~/Downloads
 	ippicv_local_file="ippicv_linux_20151201.tgz"
-    opencv_ippicv_path=~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e
+        opencv_ippicv_path=~/Downloads/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e
 	mkdir -p ${opencv_ippicv_path}
 	ippicv_url="https://raw.githubusercontent.com/Itseez/opencv_3rdparty/81a676001ca8075ada498583e4166079e5744668/ippicv/ippicv_linux_20151201.tgz"
 	wget_file  $ippicv_local_file  $ippicv_url 
@@ -167,11 +187,12 @@ install_opencv3_2_0() {
 	
 	msg_all "opencv3.2.1 compile and install at ~/Downloads/opencv-3.2.0/build..."
 	mkdir -p ~/Downloads/opencv-3.2.0/build && cd ~/Downloads/opencv-3.2.0/build
-    cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+        cmd="cmake  -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
 		-D INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=ON \
 		-D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
 		-D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
 		-D WITH_IPP=ON -D WITH_FFMPEG=ON -D FORCE_VTK=ON \
+		-D ENABLE_CXX11=1 \
 		-D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
 		-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.2.0/modules .. "
 	exec_cmd_all $cmd
@@ -229,7 +250,8 @@ install_opencv3_4_1() {
 	fi
 	exec_cmd_log cp  ${ippicv_local_file}  ${ippicv_local_file_in_opencv}
 	# line47 replace to local path of ippicv tgz 
-	sed -i '47c "~/Downloads/ippicv_2017u3_lnx_intel64_general_20170822.tgz"' ~/Downloads/opencv-3.4.1/3rdparty/ippicv/ippicv.cmake 
+	sudo cp ${ippicv_local_file}  /tmp
+	sed -i '47c "file:///tmp/"' ~/Downloads/opencv-3.4.1/3rdparty/ippicv/ippicv.cmake 
 	cd ~/Downloads
 
 	msg_all "opencv3.2.1 compile and install ..."	
@@ -239,11 +261,12 @@ install_opencv3_4_1() {
 			-D WITH_TBB=ON  -D WITH_V4L=ON -D WITH_QT=ON  -D WITH_GTK=ON  -D WITH_OPENGL=ON \
 			-D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF \
 			-D WITH_IPP=ON -D WITH_FFMPEG=ON   \
+			-D ENABLE_CXX11=1 \
 			-D BUILD_DOCS=OFF -DPYTHON_EXECUTABLE=$(which python) \
 			-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.4.0/modules .. "
 	exec_cmd_all $cmd
 	exec_cmd_all "make -j$(nproc)" 
-	exec_cmd_log "sudo make install"
+	exec_cmd_all "sudo make install"
 }
 
 
