@@ -115,7 +115,7 @@ install_src() {
 	cd ~/Downloads/$3/build
         exec_cmd_all "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local  .. "
 	exec_cmd_all "make  -j$(nproc)" 
-	exec_cmd_all "sudo make install"
+	exec_cmd_log "sudo make install"
 	cd ~/Downloads
 
 }
@@ -266,7 +266,7 @@ install_opencv3_4_1() {
 			-D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib-3.4.0/modules .. "
 	exec_cmd_all $cmd
 	exec_cmd_all "make -j$(nproc)" 
-	exec_cmd_all "sudo make install"
+	exec_cmd_log "sudo make install"
 }
 
 
