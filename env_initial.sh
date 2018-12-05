@@ -16,7 +16,7 @@ cd $cur_path
 
 # func:  install all depend libraries
 install_depend_libs() {
-    install_lib "vim g++ unzip wget git git-core build-essential cmake  doxygen"
+    install_lib "vim  unzip wget git git-core build-essential cmake  doxygen software-properties-common"
     install_lib "freeglut3 freeglut3-dbg freeglut3-dev gfortran graphviz libgtk2.0-dev"
     install_lib "libatlas-base-dev libavcodec-dev libavformat-dev libeigen3-dev  "
     install_lib "libboost-dev libboost-filesystem-dev libboost-system1.58-dev libboost-thread-dev   "
@@ -47,25 +47,24 @@ main() {
     touch ~/Downloads/install.log
 
     msg_all " "
-    msg_all "-----------------------------------------------------------------------"
+    msg_all "----------------------------------------------------------------------------"
     msg_all "The program will install most depend libraries of SLAM"
     msg_all "e.g. Eigen, Sophus, Ceres, Pangoin,Ceres, G2O, PCL, OpenCV "
     msg_all "It will take several hours to finish all of them. Good Luck!"
     msg_all ". "
     msg_all "This installation starts at : $(date) "
-    msg_all "All install information will be recorded in $log_file.  "
-    msg_all "NOTE: please prepare the file ~/Downloads/opencv3.4.cache.zip for OpenCV 3.4 "
-    msg_all "      download url :https://download.csdn.net/download/u010342901/10173967"
-    msg_all "-----------------------------------------------------------------------"
+    msg_all "All install log at : $log_file.  "
+    msg_all "----------------------------------------------------------------------------"
 
     # apt update
-    msg_all  " "
-    msg_all "Maybe you need input the root password for sudo execution.  "
+    msg_all " "
+    msg_all "input the root password for sudo execution.  "
     exec_cmd_all "sudo apt-get update"
 
 
     msg_all  " "
     msg_all  "------------------ apt install all depend libraries ------------------"
+    install_gcc6
     install_depend_libs
 
 
